@@ -25,6 +25,7 @@ class SecureSerializer(object):
         self._cert_store = cert_store
         self._digest = get_digest_algorithm(digest)
         self._serializer = serializer
+        self._acc = [] if self._serializer == 'json' else ['application/x-python-serialize']
 
     def serialize(self, data):
         """Serialize data structure into string."""
@@ -52,7 +53,7 @@ class SecureSerializer(object):
                                        payload['body'])
             self._cert_store[signer].verify(body, signature, self._digest)
         return loads(body, payload['content_type'],
-                     payload['content_encoding'], force=True)
+                     payload['content_encoding'], accept = self._acc, force=True)
 
     def _pack(self, body, content_type, content_encoding, signer, signature,
               sep=str_to_bytes('\x00\x01')):
