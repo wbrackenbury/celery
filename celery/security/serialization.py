@@ -82,8 +82,6 @@ class SecureSerializer(object):
 
         v = raw_payload[signature_end_position + sep_len:].split(sep)
 
-        print(v)
-
         return {
             'signer': signer,
             'signature': signature,
