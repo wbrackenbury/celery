@@ -51,7 +51,7 @@ class SecureSerializer(object):
                                        payload['signer'],
                                        payload['body'])
             self._cert_store[signer].verify(body, signature, self._digest)
-        return loads(bytes_to_str(body), payload['content_type'],
+        return loads(body, payload['content_type'],
                      payload['content_encoding'], force=True)
 
     def _pack(self, body, content_type, content_encoding, signer, signature,
@@ -82,12 +82,14 @@ class SecureSerializer(object):
 
         v = raw_payload[signature_end_position + sep_len:].split(sep)
 
+        print(v)
+
         return {
             'signer': signer,
             'signature': signature,
             'content_type': bytes_to_str(v[0]),
             'content_encoding': bytes_to_str(v[1]),
-            'body': bytes_to_str(v[2]),
+            'body': v[2],
         }
 
 

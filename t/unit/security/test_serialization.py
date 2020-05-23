@@ -4,6 +4,7 @@ import base64
 import os
 
 import pytest
+from case import Mock, mock, patch, skip
 from kombu.serialization import registry
 from kombu.utils.encoding import bytes_to_str
 
@@ -18,11 +19,12 @@ from .case import SecurityCase
 
 class test_secureserializer(SecurityCase):
 
-    def _get_s(self, key, cert, certs):
+    def _get_s(self, key, cert, certs, serial = 'json'):
         store = CertStore()
         for c in certs:
             store.add_cert(Certificate(c))
-        return SecureSerializer(PrivateKey(key), Certificate(cert), store)
+        return SecureSerializer(PrivateKey(key), Certificate(cert),
+                                store, serializer = serial)
 
     def test_serialize(self):
         s = self._get_s(KEY1, CERT1, [CERT1])
@@ -65,3 +67,7 @@ class test_secureserializer(SecurityCase):
             rdata = bytes_to_str(base64.urlsafe_b64encode(os.urandom(265)))
             s = self._get_s(KEY1, CERT1, [CERT1])
             assert s.deserialize(s.serialize(rdata)) == rdata
+
+    def test_pickle_serialize_no_verify(self):
+        s = self._get_s(KEY1, CERT1, [CERT1], serial = 'pickle')
+        assert s.deserialize(s.serialize('foo')) == 'foo'
